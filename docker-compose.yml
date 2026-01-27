@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:15
+    container_name: ziplisten-db
+    environment:
+      POSTGRES_USER: zipuser
+      POSTGRES_PASSWORD: zippassword
+      POSTGRES_DB: ziplistendb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zipuser -d ziplistendb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: ziplisten-backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://zipuser:zippassword@db:5432/ziplistendb
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: ziplisten-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_API_URL: http://localhost:8000
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

@@ -1,0 +1,78 @@
+@startuml Zip Listen Analytics Data Model
+
+' Style for compact layout
+skinparam componentStyle rectangle
+skinparam classFontSize 10
+skinparam noteFontSize 9
+
+!define TABLE(x) entity x << (T,#FFAAAA) >>
+!define PK(x) <u>x</u>
+!define FK(x) <i>x</i>
+
+' Core Tables
+TABLE(listen_events) {
+  PK(id): SERIAL
+  artist: VARCHAR
+  song: VARCHAR
+  duration: INTEGER
+  FK(userId): INTEGER
+  state: VARCHAR(2)
+  level: VARCHAR
+  genre: VARCHAR
+  timestamp: TIMESTAMP
+}
+
+TABLE(status_change_events) {
+  PK(id): SERIAL
+  level: VARCHAR
+  FK(userId): INTEGER
+  state: VARCHAR(2)
+  timestamp: TIMESTAMP
+}
+
+' Conceptual Entities
+entity "Users" as users {
+  userId: INTEGER
+  current_level: VARCHAR
+  state: VARCHAR(2)
+}
+
+entity "US Regions" as regions {
+  region_name: VARCHAR
+  states: LIST
+}
+
+entity "Analytics" as analytics {
+  Genre by Region
+  Subscribers by Region
+  Top Artists
+  Rising Artists
+}
+
+' Relationships
+listen_events }o--|| users
+status_change_events }o--|| users
+users }o--|| regions
+listen_events }o--|| regions
+listen_events ||..o{ analytics
+status_change_events ||..o{ analytics
+
+note right of regions
+Northeast: CT, ME, MA, NH, RI, VT, NJ, NY, PA
+Southeast: DE, FL, GA, MD, NC, SC, VA, WV, 
+           AL, KY, MS, TN, AR, LA, TX
+Midwest: IL, IN, MI, OH, WI, IA, KS, 
+         MN, MO, NE, ND, SD
+West: AZ, CO, ID, MT, NV, NM, UT, WY, 
+      AK, CA, HI, OR, WA
+end note
+
+note bottom of analytics
+Derived from raw events:
+• Genre distribution by region
+• Paid vs Free subscribers
+• Stream count rankings
+• Growth rate calculations
+end note
+
+@enduml

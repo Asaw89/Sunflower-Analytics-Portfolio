@@ -1,2 +1,9 @@
-data/*.csv
-*.csv
+# Ignore large raw event CSVs
+data/listen_events.csv
+data/page_view_events.csv
+data/auth_events.csv
+data/status_change_events.csv
+
+# Allow summary tables (they're small)
+!sunflower_summary_*.csv
+!*summary*.csv

@@ -256,3 +256,57 @@
   border-radius: 6px;
   overflow-x: auto;
 }
+
+.voice-btn {
+  background: white;
+  color: #8b5cf6;
+  border: 2px solid #8b5cf6;
+  padding: 1rem;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.voice-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  transform: scale(1.05);
+}
+
+.voice-btn.listening {
+  background: #ef4444;
+  color: rgb(170, 43, 212);
+  border-color: #ef4444;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.voice-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.chat-input-container {
+  max-width: 800px;
+  margin: 3rem auto;
+  display: flex;
+  gap: 1rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 50px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  align-items: center;  /* NEW - keeps everything aligned */
+}

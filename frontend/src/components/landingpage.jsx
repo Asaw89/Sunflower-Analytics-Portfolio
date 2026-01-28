@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './landingpage.css';
 import solLogo from '../assets/sol-logo.png';
 
@@ -6,6 +6,54 @@ function LandingPage() {
   const [messages, setMessages] = useState([]);
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [recognition, setRecognition] = useState(null);
+    
+    // Initialize speech recognition
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognitionInstance = new SpeechRecognition();
+      
+      recognitionInstance.continuous = false;
+      recognitionInstance.interimResults = false;
+      recognitionInstance.lang = 'en-US';
+      
+      recognitionInstance.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        console.log('Speech recognized:', transcript);
+        setQuestion(transcript);
+        setIsListening(false);
+      };
+      
+      recognitionInstance.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        alert(`Error: ${event.error}`);
+        setIsListening(false);
+      };
+      
+      recognitionInstance.onend = () => {
+        setIsListening(false);
+      };
+      
+      setRecognition(recognitionInstance);
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (!recognition) {
+      alert('Speech recognition is not supported in your browser. Try Chrome or Edge.');
+      return;
+    }
+    
+    if (isListening) {
+      recognition.stop();
+      setIsListening(false);
+    } else {
+      recognition.start();
+      setIsListening(true);
+    }
+  };
 
   const askQuestion = async () => {
     if (!question.trim()) return;
@@ -32,14 +80,14 @@ function LandingPage() {
         sql: data.sql,
         data: data.raw_data
       }]);
-      
+
     } catch (error) {
       setMessages(prev => [...prev, {
         type: 'error',
         text: 'Sorry, I encountered an error. Please try again.'
       }]);
     }
-    
+
     setQuestion('');
     setLoading(false);
   };
@@ -97,7 +145,7 @@ function LandingPage() {
                     )}
                   </div>
                 )}
-                
+
                 {msg.type === 'error' && (
                   <div className="message-bubble error-bubble">
                     {msg.text}
@@ -109,6 +157,15 @@ function LandingPage() {
         )}
 
         <div className="chat-input-container">
+          <button 
+            className={`voice-btn ${isListening ? 'listening' : ''}`}
+            onClick={toggleListening}
+            disabled={loading}
+            title="Click to use voice input"
+            >
+            {isListening ? '🎤 Listening...' : '🎙️'}
+          </button>
+  
           <input 
             type="text" 
             placeholder="Hi there! I'm Sol... how can I assist you today?"
@@ -118,14 +175,16 @@ function LandingPage() {
             onKeyPress={handleKeyPress}
             disabled={loading}
           />
-          <button 
-            className="send-btn-landing" 
-            onClick={askQuestion}
-            disabled={loading || !question.trim()}
-          >
-            {loading ? 'Thinking...' : 'Send'}
-          </button>
-        </div>
+
+        <button 
+          className={`voice-btn ${isListening ? 'listening' : ''}`}
+          onClick={toggleListening}
+          disabled={loading}
+          title={isListening ? "Click again to stop" : "Click to use voice input"}
+        >
+          {isListening ? '⏹️ Stop' : '🎙️'}
+        </button>
+      </div>
 
         <div className="features-grid">
           <div className="feature-card">

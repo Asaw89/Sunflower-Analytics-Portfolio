@@ -68,13 +68,14 @@ Available tables and columns:
    - period (integer) - time period
    - upgrades (integer) - users who upgraded
 
-IMPORTANT: 
-- When asked for totals across regions/cities, use SUM()
-- When asking about specific locations, filter by region_name, state, or city
-- Use state abbreviations (NY, CA, TX) for region_name and state fields
-- For growth queries, use summary_city_growth_trends
-- For device/platform queries, use summary_platform_usage
-- For retention/churn queries, use summary_retention_cohort
+IMPORTANT QUERY RULES:
+- When asked for "top" or "most popular" items, return the NAME/identifier column, not just the count
+- ALWAYS include ORDER BY and LIMIT when finding top results
+- For "top genre", use: SELECT genre FROM summary_genre_by_region ORDER BY listen_count DESC LIMIT 1
+- For "top artist", use: SELECT artist FROM summary_artist_popularity_by_geo ORDER BY play_count DESC LIMIT 1
+- For "top city", use: SELECT city FROM summary_city_growth_trends ORDER BY percent_growth_wow DESC LIMIT 1
+- When totaling across regions/cities, use SUM()
+- Use state abbreviations (NY, CA, TX) for filtering
 
 Convert user questions to PostgreSQL queries.
 Return ONLY the SQL query with no explanation.
@@ -109,8 +110,20 @@ def execute_query(sql: str) -> tuple:
         results = cursor.fetchall()
         column_names = [desc[0] for desc in cursor.description]
         conn.close()
+        if not results:
+            return (
+                "No data found for this query. Try asking about artists, genres, cities, subscribers, device types, or retention metrics.",
+                None,
+            )
+
         return results, column_names
     except Exception as e:
+        # More helpful error messages
+        if "column" in str(e).lower() and "does not exist" in str(e).lower():
+            raise HTTPException(
+                status_code=400,
+                detail="That data doesn't exist in our database. Try asking about artists, genres, cities, subscribers, or device usage.",
+            )
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 

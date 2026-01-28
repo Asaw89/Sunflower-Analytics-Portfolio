@@ -161,9 +161,9 @@ function LandingPage() {
             className={`voice-btn ${isListening ? 'listening' : ''}`}
             onClick={toggleListening}
             disabled={loading}
-            title="Click to use voice input"
+            title={isListening ? "Click again to stop" : "Click to use voice input"}
             >
-            {isListening ? '🎤 Listening...' : '🎙️'}
+            {isListening ? '⏹️ Stop'  : '🎙️'}
           </button>
   
           <input 
@@ -177,14 +177,25 @@ function LandingPage() {
           />
 
         <button 
-          className={`voice-btn ${isListening ? 'listening' : ''}`}
-          onClick={toggleListening}
-          disabled={loading}
-          title={isListening ? "Click again to stop" : "Click to use voice input"}
+          className="send-btn-landing"
+          onClick={askQuestion}
+          disabled={loading || !question.trim()}
         >
-          {isListening ? '⏹️ Stop' : '🎙️'}
+          {loading ? 'Thinking...' : 'Send'}
         </button>
       </div>
+      {!recognition && (
+        <p style={{
+        fontSize: '0.9rem', 
+        color: '#6b7280', 
+        marginTop: '0.5rem',
+        textAlign: 'center',
+        maxWidth: '800px',
+        margin: '0.5rem auto'
+      }}>
+        💡 Tip: Voice input works best in Chrome. On Safari/iOS, use your keyboard's dictation button (🎤) to speak your question.
+      </p>
+    )}
 
         <div className="features-grid">
           <div className="feature-card">

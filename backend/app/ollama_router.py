@@ -35,26 +35,68 @@ Available tables and columns:
 2. summary_genre_by_region
    - genre (text) - music genre
    - last_updated (timestamp)
-   - region_name (text) - US REGIONS: 'West', 'Midwest', 'Northeast', 'Southeast'
-   - listen_count (integer) - total listens
+   - region_name (text) - US REGIONS: 'West', 'Midwest', 'Northeast', 'Southeast', 'Unknown'
+   - listen_count (integer) - total listens for this genre in this region
 
 3. summary_subscribers_by_region
    - last_updated (timestamp)
    - level (text) - 'free' or 'paid'
-   - region_name (text) - US REGIONS: 'West', 'Midwest', 'Northeast', 'Southeast'
-   - subscriber_count (integer)
+   - region_name (text) - US REGIONS: 'West', 'Midwest', 'Northeast', 'Southeast', 'Unknown'
+   - subscriber_count (integer) - number of subscribers in this region
 
-[... rest of your tables ...]
+4. summary_city_growth_trends
+   - city (text) - city name
+   - date (date) - data collection date
+   - last_updated (timestamp)
+   - state (text) - US state abbreviation
+   - new_users (integer) - new users in this city
+   - percent_growth_wow (numeric) - week-over-week growth percentage
+   - total_streaming_hours (integer) - total hours streamed
 
-IMPORTANT QUERY RULES:
-- summary_artist_popularity_by_geo uses STATE codes (NY, CA, TX)
-- summary_genre_by_region uses REGIONS (West, Midwest, Northeast, Southeast)
-- summary_subscribers_by_region uses REGIONS (West, Midwest, Northeast, Southeast)
-- For city queries, use summary_city_growth_trends with STATE codes
-- When users ask about genres or subscribers by REGION, use: West, Midwest, Northeast, Southeast
-- When users ask about artists or cities by STATE, use: NY, CA, TX, FL, etc.
+5. summary_platform_usage
+   - device_type (text) - device type (e.g., 'mobile', 'desktop', 'tablet')
+   - last_updated (timestamp)
+   - region_name (text) - US region
+   - active_users (integer) - number of active users
+   - play_count (integer) - total plays on this device
 
+6. summary_retention_cohort
+   - cohort_month (date) - cohort starting month
+   - last_updated (timestamp)
+   - churned_users (integer) - users who left
+   - downgrades (integer) - users who downgraded
+   - period (integer) - time period
+   - upgrades (integer) - users who upgraded
 
+CRITICAL QUERY CONSTRUCTION RULES:
+
+**When to use SUM() vs ORDER BY LIMIT:**
+- "top X" or "most popular X" → Use ORDER BY column DESC LIMIT X (returns top items)
+  Example: "top 3 genres" → SELECT genre FROM summary_genre_by_region ORDER BY listen_count DESC LIMIT 3
+  
+- "total across all X" or "how many total" → Use SUM(column) (aggregates values)
+  Example: "total paid subscribers" → SELECT SUM(subscriber_count) FROM summary_subscribers_by_region WHERE level = 'paid'
+
+**Table-specific rules:**
+- summary_artist_popularity_by_geo: region_name = STATE codes (NY, CA, TX)
+- summary_genre_by_region: region_name = REGIONS (West, Midwest, Northeast, Southeast)
+- summary_subscribers_by_region: region_name = REGIONS (West, Midwest, Northeast, Southeast)
+- summary_city_growth_trends: state = STATE codes (NY, CA, TX)
+
+**Query pattern examples:**
+- "top 3 genres in West" → SELECT genre FROM summary_genre_by_region WHERE region_name = 'West' ORDER BY listen_count DESC LIMIT 3
+- "most popular artist in NY" → SELECT artist FROM summary_artist_popularity_by_geo WHERE region_name = 'NY' ORDER BY play_count DESC LIMIT 1
+- "total paid subscribers" → SELECT SUM(subscriber_count) FROM summary_subscribers_by_region WHERE level = 'paid'
+- "city with highest growth" → SELECT city FROM summary_city_growth_trends ORDER BY percent_growth_wow DESC LIMIT 1
+
+**Important distinctions:**
+- COUNT() = counts number of rows
+- SUM() = adds up values in a column
+- ORDER BY ... LIMIT = returns top ranked items
+
+Convert user questions to PostgreSQL queries.
+Return ONLY the SQL query with no explanation.
+Use the exact column and table names provided.
 """
 
 

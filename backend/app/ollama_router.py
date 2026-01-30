@@ -28,58 +28,33 @@ Available tables and columns:
 1. summary_artist_popularity_by_geo
    - artist (text) - artist name
    - last_updated (timestamp)
-   - region_name (text) - US state abbreviations like 'NY', 'CA', 'TX'
+   - region_name (text) - US STATE abbreviations like 'NY', 'CA', 'TX', 'FL'
    - play_count (integer) - total number of plays
    - unique_listeners (integer) - unique users who listened
 
 2. summary_genre_by_region
    - genre (text) - music genre
    - last_updated (timestamp)
-   - region_name (text) - US state abbreviations
+   - region_name (text) - US REGIONS: 'West', 'Midwest', 'Northeast', 'Southeast'
    - listen_count (integer) - total listens
 
 3. summary_subscribers_by_region
    - last_updated (timestamp)
    - level (text) - 'free' or 'paid'
-   - region_name (text) - US state abbreviations
-   - subscriber_count (integer) - number of subscribers
+   - region_name (text) - US REGIONS: 'West', 'Midwest', 'Northeast', 'Southeast'
+   - subscriber_count (integer)
 
-4. summary_city_growth_trends
-   - city (text) - city name
-   - date (date) - data collection date
-   - last_updated (timestamp)
-   - state (text) - US state abbreviation
-   - new_users (integer) - new users in this city
-   - percent_growth_wow (numeric) - week-over-week growth percentage
-   - total_streaming_hours (integer) - total hours streamed
-
-5. summary_platform_usage
-   - device_type (text) - device type (e.g., 'mobile', 'desktop', 'tablet')
-   - last_updated (timestamp)
-   - region_name (text) - US region
-   - active_users (integer) - number of active users
-   - play_count (integer) - total plays on this device
-
-6. summary_retention_cohort
-   - cohort_month (date) - cohort starting month
-   - last_updated (timestamp)
-   - churned_users (integer) - users who left
-   - downgrades (integer) - users who downgraded
-   - period (integer) - time period
-   - upgrades (integer) - users who upgraded
+[... rest of your tables ...]
 
 IMPORTANT QUERY RULES:
-- When asked for "top" or "most popular" items, return the NAME/identifier column, not just the count
-- ALWAYS include ORDER BY and LIMIT when finding top results
-- For "top genre", use: SELECT genre FROM summary_genre_by_region ORDER BY listen_count DESC LIMIT 1
-- For "top artist", use: SELECT artist FROM summary_artist_popularity_by_geo ORDER BY play_count DESC LIMIT 1
-- For "top city", use: SELECT city FROM summary_city_growth_trends ORDER BY percent_growth_wow DESC LIMIT 1
-- When totaling across regions/cities, use SUM()
-- Use state abbreviations (NY, CA, TX) for filtering
+- summary_artist_popularity_by_geo uses STATE codes (NY, CA, TX)
+- summary_genre_by_region uses REGIONS (West, Midwest, Northeast, Southeast)
+- summary_subscribers_by_region uses REGIONS (West, Midwest, Northeast, Southeast)
+- For city queries, use summary_city_growth_trends with STATE codes
+- When users ask about genres or subscribers by REGION, use: West, Midwest, Northeast, Southeast
+- When users ask about artists or cities by STATE, use: NY, CA, TX, FL, etc.
 
-Convert user questions to PostgreSQL queries.
-Return ONLY the SQL query with no explanation.
-Use the exact column and table names provided.
+
 """
 
 
